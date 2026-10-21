@@ -6,36 +6,48 @@
 
 ## 安装 Skill
 
-### 在对话里让 Agent 安装
-
-打开 Cursor、Claude Code、Codex 或其他 Agent 的对话页面，把下面这段话发给它。Agent 会自己跑安装命令，不用先开终端。
-
-```text
-请安装这个 Skill，装到我的用户目录，让之后的项目都能用：
-https://github.com/LiamZJU/skill-risk-checkup
-
-请执行：
-npx skills add LiamZJU/skill-risk-checkup -g -y
-
-只装给某一个 Agent 时，改用对应的一条：
-npx skills add LiamZJU/skill-risk-checkup -g -a cursor -y
-npx skills add LiamZJU/skill-risk-checkup -g -a claude-code -y
-npx skills add LiamZJU/skill-risk-checkup -g -a codex -y
-
-装完告诉我 Skill 落在哪个目录。不要修改其他 Skill。
-```
-
-也可以用自己的话，只要带上仓库地址，例如：「帮我安装 https://github.com/LiamZJU/skill-risk-checkup 这个 skill」。Agent 读到本页后，按上面的命令安装。
-
-装好后新开一轮对话，说「给所有 Skill 做风险体检」，或输入 `/skill-risk-checkup`。
-
-### 自己在终端安装
+第一次请用下面这条。它只装给 Cursor、Claude Code 和 Codex，装完退出码是 0。
 
 ```bash
-npx skills add LiamZJU/skill-risk-checkup -g -y
+npx skills add LiamZJU/skill-risk-checkup -g -a cursor -a claude-code -a codex -y
 ```
 
-只装给一个 Agent：
+装好时会看到这一行：
+
+```text
+✓ ~\.agents\skills\skill-risk-checkup
+```
+
+Cursor 和 Codex 直接读这个目录。Claude Code 会得到指向同一份文件的快捷方式。
+
+然后新开一轮对话，发送：
+
+```text
+给所有 Skill 做风险体检
+```
+
+也可以输入 `/skill-risk-checkup`。
+
+`npx skills add LiamZJU/skill-risk-checkup -g -y` 会多试一个不支持全局安装的 Agent，结尾出现 `Failed to install 1` 和 `PromptScript does not support global skill installation`。只要上面的 `✓` 已经出现，Skill 已经装好，按上一句去新对话里用即可。
+
+### 在对话里让 Agent 安装
+
+打开 Cursor、Claude Code 或 Codex 的对话页面，把下面这段话发给它：
+
+```text
+请安装 https://github.com/LiamZJU/skill-risk-checkup 这个 Skill，让之后的项目都能用。
+
+请执行这一条，不要改成不带 -a 的 -g -y：
+npx skills add LiamZJU/skill-risk-checkup -g -a cursor -a claude-code -a codex -y
+
+看到 ✓ ~\.agents\skills\skill-risk-checkup 就是装好了。
+如果结尾还有 PromptScript does not support global skill installation，只要上面的 ✓ 在，就按成功处理。
+
+装完后用中文告诉我：Skill 已经装好。请新开一轮对话，发送「给所有 Skill 做风险体检」，或输入 /skill-risk-checkup。
+不要修改其他 Skill。
+```
+
+只装给一个 Agent 时，把命令换成对应的一条：
 
 ```bash
 npx skills add LiamZJU/skill-risk-checkup -g -a cursor -y
