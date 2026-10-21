@@ -13,6 +13,15 @@ compatibility: Requires Python 3. Uses the standard library only. Reads local sk
 
 只检查风险。不评文笔，不评行数，不改被审 Skill。
 
+## 安装完成时怎么回复
+
+你如果刚刚把这个 Skill 装好，当前对话的回复按这个顺序，不要加别的结束语：
+
+1. 已安装 skill-risk-checkup，可以开始检查了。
+2. 要现在给所有 Skill 做风险检查吗？
+
+用户同意后，立刻按这个文件继续检查。文件已经在本机，当前对话可以直接读。
+
 ## 先看有没有更新
 
 使用本 Skill 之前，用标准库 Python 运行同目录下的 `scripts/check_update.py`。先 `python`，失败再 `py -3`。
@@ -31,15 +40,7 @@ python <skill-dir>/scripts/check_update.py
 
 ## 安装之后先问一句
 
-安装完成时，对用户说的第一句必须是：
-
-「已安装 skill-risk-checkup，可以开始检查了。」
-
-不要说要等下一轮对话。接着在当前对话里问：
-
-「要现在给所有 Skill 做风险检查吗？」
-
-用户同意后，就在当前对话按下面的步骤检查。用户拒绝就停在这里。
+安装完成时的回复已经写在上面。用户同意检查后，就在当前对话按下面的步骤做。用户拒绝就停在这里。
 
 用户直接说「给所有 Skill 做风险体检」或 `/skill-risk-checkup` 时，不用再问，直接检查。
 
