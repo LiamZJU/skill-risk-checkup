@@ -311,8 +311,11 @@ USER_ROOTS: tuple[tuple[str, str, str, bool], ...] = (
     (".gemini/antigravity/skills", "antigravity", "user", True),
     (".augment/skills", "augment", "user", True),
     (".openclaw/skills", "openclaw", "user", True),
+    (".openclaw/workspace/skills", "openclaw", "user", True),
     (".clawdbot/skills", "openclaw", "user", True),
+    (".clawdbot/workspace/skills", "openclaw", "user", True),
     (".moltbot/skills", "openclaw", "user", True),
+    (".moltbot/workspace/skills", "openclaw", "user", True),
     (".codebuddy/skills", "codebuddy", "user", True),
     (".commandcode/skills", "commandcode", "user", True),
     (".snowflake/cortex/skills", "cortex", "user", True),
@@ -389,6 +392,7 @@ PROJECT_ROOTS: tuple[tuple[str, str, str, bool, bool], ...] = (
     (".pochi/skills", "pochi", "project", True, False),
     (".adal/skills", "adal", "project", True, False),
     (".devin/skills", "devin", "project", True, False),
+    (".hermes/skills", "hermes", "project", True, False),
     (".zcode/skills", "zcode", "project", True, False),
     ("skills", "openclaw", "project", True, True),
 )
@@ -404,7 +408,8 @@ AGENT_SOURCES: dict[str, set[str]] = {
     "grok": {"grok"},
     "windsurf": {"windsurf"},
     "cline": {"cline", "shared"},
-    "openclaw": {"openclaw"},
+    "openclaw": {"openclaw", "shared"},
+    "hermes": {"hermes", "shared"},
     "droid": {"droid", "antigravity"},
     "antigravity": {"antigravity"},
     "goose": {"goose"},
@@ -426,6 +431,8 @@ AGENT_ALIASES: dict[str, str] = {
     "copilot": "github-copilot",
     "github-copilot": "github-copilot",
     "kimi-cli": "kimi",
+    "open-claw": "openclaw",
+    "hermes-agent": "hermes",
 }
 
 
@@ -509,6 +516,43 @@ def find_project_skill_roots(project: Path) -> list[SkillRoot]:
     return found
 
 
+def openclaw_extra_roots(home: Path, env: Mapping[str, str]) -> list[SkillRoot]:
+    """Workspace, profile, and workshop dirs OpenClaw loads beyond ~/.openclaw/skills."""
+    roots: list[SkillRoot] = []
+    state = Path(env.get("OPENCLAW_STATE_DIR", str(home / ".openclaw"))).expanduser()
+    roots.append(SkillRoot(state / "skills", "openclaw", "user", True))
+    roots.append(SkillRoot(state / "workspace" / "skills", "openclaw", "user", True))
+    workspace_raw = env.get("OPENCLAW_WORKSPACE_DIR", "").strip()
+    if workspace_raw:
+        roots.append(SkillRoot(Path(workspace_raw).expanduser() / "skills", "openclaw", "user", True))
+    profile = env.get("OPENCLAW_PROFILE", "").strip()
+    if profile and profile.lower() != "default":
+        profile_home = home / f".openclaw-{profile}"
+        roots.append(SkillRoot(profile_home / "skills", "openclaw", "user", True))
+        roots.append(SkillRoot(profile_home / "workspace" / "skills", "openclaw", "user", True))
+    try:
+        entries = list(home.iterdir())
+    except OSError:
+        entries = []
+    for entry in entries:
+        if not (entry.name.startswith(".openclaw-") and entry.is_dir()):
+            continue
+        roots.append(SkillRoot(entry / "skills", "openclaw", "user", True))
+        roots.append(SkillRoot(entry / "workspace" / "skills", "openclaw", "user", True))
+    agents_dir = state / "agents"
+    if not agents_dir.is_dir():
+        return roots
+    try:
+        agent_dirs = list(agents_dir.iterdir())
+    except OSError:
+        return roots
+    for agent_dir in agent_dirs:
+        workshop = agent_dir / "agent" / "workshop-skills"
+        if workshop.is_dir():
+            roots.append(SkillRoot(workshop, "openclaw", "user", True))
+    return roots
+
+
 def direct_project_roots(project: Path) -> list[SkillRoot]:
     found: list[SkillRoot] = []
     for suffix, agent, scope, editable, _direct_only in PROJECT_ROOTS:
@@ -551,8 +595,13 @@ def discover_roots(
             add(SkillRoot(xdg / Path(relative), agent, scope, editable))
         codex_home = Path(env.get("CODEX_HOME", str(home / ".codex"))).expanduser()
         claude_home = Path(env.get("CLAUDE_CONFIG_DIR", str(home / ".claude"))).expanduser()
+        hermes_home = Path(env.get("HERMES_HOME", str(home / ".hermes"))).expanduser()
         add(SkillRoot(codex_home / "skills", "codex", "user", True))
         add(SkillRoot(claude_home / "skills", "claude", "user", True))
+        add(SkillRoot(hermes_home / "skills", "hermes", "user", True))
+        add(SkillRoot(home / ".hermes" / "skills", "hermes", "user", True))
+        for root in openclaw_extra_roots(home, env):
+            add(root)
         admin = Path("/etc/codex/skills")
         if os.name != "nt" or admin.exists():
             add(SkillRoot(admin, "codex", "admin", False))
@@ -1038,6 +1087,21 @@ def assert_discovery(failures: list[str]) -> None:
         write_skill(home / ".config" / "agents" / "skills" / "amp-only", "amp-only", "Amp config.")
         write_skill(project / "apps" / "web" / ".cursor" / "skills" / "nested", "nested", "Nested.")
         write_skill(project / "skills" / "claw", "claw", "Claw.")
+        write_skill(project / ".hermes" / "skills" / "local", "hermes-proj", "Project Hermes.")
+        write_skill(home / ".hermes" / "skills" / "devops" / "deploy", "hermes-deploy", "Hermes.")
+        write_skill(home / ".openclaw" / "workspace" / "skills" / "oc-work", "oc-work", "Workspace.")
+        write_skill(
+            home / ".openclaw-work" / "workspace" / "skills" / "profile-skill",
+            "profile-skill",
+            "Profile.",
+        )
+        write_skill(
+            home / ".openclaw" / "agents" / "main" / "agent" / "workshop-skills" / "learned",
+            "learned",
+            "Workshop.",
+        )
+        custom_hermes = base / "hermes-profile"
+        write_skill(custom_hermes / "skills" / "moved", "hermes-moved", "Moved.")
         write_skill(project / "src" / "skills" / "library", "library", "Not a skill root.")
         write_skill(
             home / "proj" / "apps" / ".cursor" / "skills" / "hidden",
@@ -1064,9 +1128,49 @@ def assert_discovery(failures: list[str]) -> None:
         assert_true(claude_names == {"hello"}, "claude-code should only see its own skills", failures)
         assert_true(codex_names == {"mine", "sys-skill"}, "codex should see its own skills", failures)
         assert_true("amp-only" not in codex_names and "amp-only" not in claude_names, "config agents skills are not codex or claude", failures)
+        openclaw_names = {
+            skill["name"]
+            for skill in scan_roots(
+                discover_roots(home, [project], {}, agents=resolve_agent("open-claw")[1])
+            )["skills"]
+        }
+        hermes_names = {
+            skill["name"]
+            for skill in scan_roots(
+                discover_roots(
+                    home,
+                    [project],
+                    {"HERMES_HOME": str(custom_hermes)},
+                    agents=resolve_agent("hermes-agent")[1],
+                )
+            )["skills"]
+        }
+        assert_true(
+            openclaw_names == {"claw", "oc-work", "profile-skill", "learned"},
+            f"openclaw skills were {sorted(openclaw_names)}",
+            failures,
+        )
+        assert_true(
+            hermes_names == {"hermes-deploy", "hermes-proj", "hermes-moved"},
+            f"hermes skills were {sorted(hermes_names)}",
+            failures,
+        )
 
     by_name = {str(skill["name"]): skill for skill in report["skills"]}  # type: ignore[index]
-    for name in ("hello", "builtin-skill", "sys-skill", "mine", "nested", "claw", "amp-only"):
+    for name in (
+        "hello",
+        "builtin-skill",
+        "sys-skill",
+        "mine",
+        "nested",
+        "claw",
+        "amp-only",
+        "hermes-deploy",
+        "hermes-proj",
+        "oc-work",
+        "profile-skill",
+        "learned",
+    ):
         assert_true(name in by_name, f"discovery missed {name}", failures)
     for name in ("library", "hidden", "too-deep"):
         assert_true(name not in by_name, f"discovery should skip {name}", failures)
@@ -1094,6 +1198,10 @@ def assert_discovery(failures: list[str]) -> None:
         )
     if "claw" in by_name:
         assert_true(by_name["claw"]["agent"] == "openclaw", "repo-root skills/ should be openclaw", failures)
+    if "hermes-deploy" in by_name:
+        assert_true(by_name["hermes-deploy"]["agent"] == "hermes", "hermes user skill", failures)
+    if "oc-work" in by_name:
+        assert_true(by_name["oc-work"]["agent"] == "openclaw", "openclaw workspace skill", failures)
 
 
 def self_test() -> int:

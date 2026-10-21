@@ -7,7 +7,7 @@
 ## 怎么扫
 
 1. 用户级目录直接拼在用户主目录上。不存在就跳过，不往旁边的文件夹找。
-2. `CODEX_HOME` 没设置时用 `~/.codex`。`CLAUDE_CONFIG_DIR` 没设置时用 `~/.claude`。`XDG_CONFIG_HOME` 没设置时用 `~/.config`。
+2. `CODEX_HOME` 没设置时用 `~/.codex`。`CLAUDE_CONFIG_DIR` 没设置时用 `~/.claude`。`HERMES_HOME` 没设置时用 `~/.hermes`，设置了也仍然检查默认的 `~/.hermes/skills`。`XDG_CONFIG_HOME` 没设置时用 `~/.config`。`OPENCLAW_STATE_DIR` 没设置时用 `~/.openclaw`。`OPENCLAW_WORKSPACE_DIR` 和 `OPENCLAW_PROFILE` 会额外加上对应的 `skills` 目录。名字以 `.openclaw-` 开头的配置目录也会检查。
 3. 当前仓库先找 git 根。从根向下找已知目录，最多 8 层，跳过 `node_modules`、`.git`、虚拟环境和构建产物。Cursor 官方会加载仓库任意深处的 `.cursor/skills` 和 `.agents/skills`，所以不能只看仓库根。
 4. 工作目录本身就是用户主目录或磁盘根时，不做这层向下查找，只检查该目录直接摆出来的已知路径。
 5. 仓库根上名为 `skills` 的直接子目录算 OpenClaw（也常被通用安装使用）。`src/skills` 这种路径不算。
@@ -23,7 +23,7 @@ Codex 放在 `~/.codex/skills/.system` 里的 Skill，即使用户目录本身�
 
 | 目录 | 标记 | 谁会读 |
 | --- | --- | --- |
-| `~/.agents/skills/`、`<仓库>/.agents/skills/` | `shared` | Cursor、Codex、OpenCode、Gemini CLI、Copilot、Cline、Amp、Kimi |
+| `~/.agents/skills/`、`<仓库>/.agents/skills/` | `shared` | Cursor、Codex、OpenCode、Gemini CLI、Copilot、Cline、OpenClaw、Hermes、Amp、Kimi、Warp、Zed |
 | `~/.config/agents/skills/` | `universal` | Amp、Kimi、Universal |
 
 `list` 或 `check` 后面写 Agent 名字时，只进入这个 Agent 会加载的来源。`codex` 包含 `codex` 和 `shared`，不包含上面的 `universal`。`claude-code`（`claude`、`claudecode`）只有 `claude`。`cursor` 包含 `cursor`、`shared`、`claude` 和 `codex`。
@@ -52,6 +52,10 @@ Codex 放在 `~/.codex/skills/.system` 里的 Skill，即使用户目录本身�
 | `.factory/skills/` | `droid/user` | 是 |
 | `.pi/agent/skills/` | `pi/user` | 是 |
 | `.openclaw/skills/`、`.clawdbot/skills/`、`.moltbot/skills/` | `openclaw/user` | 是 |
+| `.openclaw/workspace/skills/`，以及 `.clawdbot`、`.moltbot` 下同名工作区 | `openclaw/user` | 是。OpenClaw 默认把新 Skill 装在这里 |
+| `.openclaw-<配置名>/skills/`、`.openclaw-<配置名>/workspace/skills/` | `openclaw/user` | 是 |
+| `$OPENCLAW_STATE_DIR/agents/<agent>/agent/workshop-skills/` | `openclaw/user` | 是。目录存在才列入 |
+| `$HERMES_HOME/skills/`，默认 `.hermes/skills/` | `hermes/user` | 是。类别子目录里的 `SKILL.md` 也算 |
 | `.config/goose/skills/` | `goose/user` | 是 |
 | `.config/crush/skills/` | `crush/user` | 是 |
 | `.config/devin/skills/` | `devin/user` | 是 |
@@ -124,5 +128,8 @@ Codex 放在 `~/.codex/skills/.system` 里的 Skill，即使用户目录本身�
 | `.pochi/skills/` | `pochi/project` | 是 |
 | `.adal/skills/` | `adal/project` | 是 |
 | `.devin/skills/` | `devin/project` | 是 |
+| `.hermes/skills/` | `hermes/project` | 是。Hermes 只在信任这个仓库时加载 |
 | `.zcode/skills/` | `zcode/project` | 是 |
 | 仓库根上的 `skills/` | `openclaw/project` | 是。只认这一层 |
+
+`~/.hermes/config.yaml` 里的 `skills.external_dirs` 和 `skills.create_dir` 不另作解析。这些路径如果已经是上面的已知目录，仍会扫到。

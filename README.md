@@ -46,7 +46,7 @@
 
 Agent 会先只读扫描本机已安装的 Skill，再由它自己的模型对照风险细则判断。结论写在这轮对话里：先说查了多少、几个要处理、几个只看了描述，再用表格列出要处理的 Skill。表里要有 Agent 来源，写成 Cursor、Codex 这种产品名。通过的只出现在数量里。扫描脚本只提供线索，不代替这次判断。
 
-默认检查全部 Agent。
+默认检查全部 Agent，包括 OpenClaw 和 Hermes。
 
 可选：只检查一个 Agent 时，把上面那句换成「只检查 Codex 的 Skill」「只检查 Claude Code 的 Skill」或「只检查 Cursor 的 Skill」。
 

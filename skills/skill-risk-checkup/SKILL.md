@@ -1,7 +1,7 @@
 ---
 name: skill-risk-checkup
 description: >-
-  对常见编程 Agent 已安装的 Skill 做只读风险体检，覆盖 Cursor、Claude、Codex、Copilot、OpenCode、Gemini、Grok，以及使用 .agents/skills 的其他 Agent。
+  对常见编程 Agent 已安装的 Skill 做只读风险体检，覆盖 Cursor、Claude、Codex、Copilot、OpenCode、Gemini、Grok、OpenClaw、Hermes，以及使用 .agents/skills 的其他 Agent。
   排查越权指令、隐瞒用户、机密泄露、远程执行、破坏性默认步骤、越界改配置，以及敏感能力自动触发过宽。
   使用本 Skill 前先运行 scripts/check_update.py。本地 VERSION 与 GitHub main 上的 VERSION 不同时，先提醒用户有更新。
   在用户说「给所有 Skill 做风险体检」，或要求给 Skill 做诊断、体检、风险检查，或提到技能风险、skill 风险、skill checkup、/skill-risk-checkup 时使用。
@@ -168,7 +168,9 @@ Agent 列写产品名，用顿号隔开多个。不要写 `cursor/plugin` 这种
 | trae | Trae |
 | qwen | Qwen Code |
 | devin | Devin |
-| shared | Cursor、Codex、OpenCode、Gemini CLI、GitHub Copilot、Cline、Warp、Zed |
+| openclaw | OpenClaw |
+| hermes | Hermes |
+| shared | Cursor、Codex、OpenCode、Gemini CLI、GitHub Copilot、Cline、OpenClaw、Hermes、Warp、Zed |
 | universal | Amp、Kimi |
 
 只被一个目录装到的，Agent 列只写那一个。`shared` 按上表写会读它的主流 Agent。不能改的行不要建议原地修改。
