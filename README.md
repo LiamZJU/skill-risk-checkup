@@ -14,6 +14,7 @@ https://github.com/LiamZJU/skill-risk-checkup
 
 仓库里的技能目录是 skills/skill-risk-checkup。
 装好后告诉我它落在哪个目录。
+然后告诉我：新开一轮对话，发送「给所有 Skill 做风险体检」。
 不要修改其他 Skill。
 ```
 

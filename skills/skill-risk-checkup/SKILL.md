@@ -3,7 +3,7 @@ name: skill-risk-checkup
 description: >-
   对常见编程 Agent 已安装的 Skill 做只读风险体检，覆盖 Cursor、Claude、Codex、Copilot、OpenCode、Gemini、Grok，以及使用 .agents/skills 的其他 Agent。
   排查越权指令、隐瞒用户、机密泄露、远程执行、破坏性默认步骤、越界改配置，以及敏感能力自动触发过宽。
-  在用户要求给 Skill 做诊断、体检、风险检查，或提到技能风险、skill 风险、skill checkup、/skill-risk-checkup 时使用。
+  在用户说「给所有 Skill 做风险体检」，或要求给 Skill 做诊断、体检、风险检查，或提到技能风险、skill 风险、skill checkup、/skill-risk-checkup 时使用。
 license: MIT
 compatibility: Requires Python 3. Uses the standard library only. Reads local skill files and does not modify them.
 ---
