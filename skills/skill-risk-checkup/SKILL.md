@@ -139,10 +139,39 @@ python <skill-dir>/scripts/scan_skills.py --include-defaults --root <目录>
 
 ## 要处理
 
-| 严重度 | Skill | 会怎样 | 能不能改 | 下一步 | 位置 |
+| 风险 | Agent | Skill | 可能发生什么 | 下一步 | 位置 |
 | --- | --- | --- | --- | --- | --- |
-| 严重 | 技能名 | 一句话，写按原文做会落到什么后果 | 能改 | 删掉或改写哪一句 | `完整路径` 的 `文件:行` |
-| 高 | 另一个技能名 | 一句话 | 不能改 | 停用、换成自己的 Skill，或向上游反馈 | `完整路径` |
+| 严重 | Cursor | 技能名 | 一句话，写按原文做会落到什么后果 | 删掉或改写哪一句 | `完整路径` 的 `文件:行` |
+| 高 | Codex | 另一个技能名 | 一句话 | 停用、换成自己的 Skill，或向上游反馈 | `完整路径` |
+
+Agent 列写产品名，用顿号隔开多个。不要写 `cursor/plugin` 这种内部标记。
+
+| JSON 里的 agent | 写成 |
+| --- | --- |
+| cursor | Cursor |
+| claude | Claude Code |
+| codex | Codex |
+| copilot | GitHub Copilot |
+| opencode | OpenCode |
+| gemini | Gemini CLI |
+| grok | Grok |
+| windsurf | Windsurf |
+| cline | Cline |
+| roo | Roo Code |
+| continue | Continue |
+| goose | Goose |
+| openhands | OpenHands |
+| droid | Droid |
+| antigravity | Antigravity |
+| junie | Junie |
+| kiro | Kiro |
+| trae | Trae |
+| qwen | Qwen Code |
+| devin | Devin |
+| shared | Cursor、Codex、OpenCode、Gemini CLI、GitHub Copilot、Cline、Warp、Zed |
+| universal | Amp、Kimi |
+
+只被一个目录装到的，Agent 列只写那一个。`shared` 按上表写会读它的主流 Agent。不能改的行不要建议原地修改。
 
 ## 这次没查全
 

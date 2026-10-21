@@ -343,6 +343,7 @@ CONFIG_ROOTS: tuple[tuple[str, str, str, bool], ...] = (
     ("opencode/skills", "opencode", "user", True),
     ("goose/skills", "goose", "user", True),
     ("crush/skills", "crush", "user", True),
+    ("devin/skills", "devin", "user", True),
     ("agents/skills", "universal", "user", True),
 )
 
@@ -387,6 +388,7 @@ PROJECT_ROOTS: tuple[tuple[str, str, str, bool, bool], ...] = (
     (".neovate/skills", "neovate", "project", True, False),
     (".pochi/skills", "pochi", "project", True, False),
     (".adal/skills", "adal", "project", True, False),
+    (".devin/skills", "devin", "project", True, False),
     (".zcode/skills", "zcode", "project", True, False),
     ("skills", "openclaw", "project", True, True),
 )
@@ -412,6 +414,7 @@ AGENT_SOURCES: dict[str, set[str]] = {
     "augment": {"augment"},
     "amp": {"shared", "universal"},
     "kimi": {"shared", "universal"},
+    "devin": {"devin"},
 }
 
 AGENT_ALIASES: dict[str, str] = {

@@ -54,6 +54,7 @@ Codex 放在 `~/.codex/skills/.system` 里的 Skill，即使用户目录本身�
 | `.openclaw/skills/`、`.clawdbot/skills/`、`.moltbot/skills/` | `openclaw/user` | 是 |
 | `.config/goose/skills/` | `goose/user` | 是 |
 | `.config/crush/skills/` | `crush/user` | 是 |
+| `.config/devin/skills/` | `devin/user` | 是 |
 | `.continue/skills/` | `continue/user` | 是 |
 | `.cline/skills/` | `cline/user` | 是 |
 | `.openhands/skills/` | `openhands/user` | 是 |
@@ -122,5 +123,6 @@ Codex 放在 `~/.codex/skills/.system` 里的 Skill，即使用户目录本身�
 | `.neovate/skills/` | `neovate/project` | 是 |
 | `.pochi/skills/` | `pochi/project` | 是 |
 | `.adal/skills/` | `adal/project` | 是 |
+| `.devin/skills/` | `devin/project` | 是 |
 | `.zcode/skills/` | `zcode/project` | 是 |
 | 仓库根上的 `skills/` | `openclaw/project` | 是。只认这一层 |
