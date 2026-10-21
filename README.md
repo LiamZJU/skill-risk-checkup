@@ -6,19 +6,13 @@
 
 ## 安装 Skill
 
-打开 Cursor、Claude Code、Codex 或其他 Agent 的对话，把下面这段话发给它。
+在 Agent 的当前对话里发送：
 
 ```text
-请把这个 Skill 安装到我的用户目录，让之后的项目都能用：
-https://github.com/LiamZJU/skill-risk-checkup
-
-仓库里的技能目录是 skills/skill-risk-checkup。
-装好后告诉我它落在哪个目录。
-然后告诉我：新开一轮对话，发送「给所有 Skill 做风险体检」。
-不要修改其他 Skill。
+请安装这个 Skill: https://github.com/LiamZJU/skill-risk-checkup
 ```
 
-装好后新开一轮对话再检查。
+装好后，Agent 会在这轮对话里问你：要不要现在给所有 Skill 做风险检查。你同意后，检查就在当前对话里开始。
 
 也可以自己把 `skills/skill-risk-checkup` 整个目录复制到：
 
@@ -33,19 +27,15 @@ https://github.com/LiamZJU/skill-risk-checkup
 | GitHub Copilot | `~/.copilot/skills/skill-risk-checkup` |
 | 多个 Agent 共用 | `~/.agents/skills/skill-risk-checkup` |
 
-复制后重新打开一次 Agent 对话。
+复制后，在当前对话里让 Agent 读取这个 Skill。它会问你要不要现在做风险检查。
 
 ## 检查
 
-必须：新开一轮对话，发送：
+安装结束后，Agent 会在当前对话里问：要不要现在给所有 Skill 做风险检查。回答要，就在这轮对话里开始。
 
-```text
-给所有 Skill 做风险体检
-```
+也可以直接发送「给所有 Skill 做风险体检」，或输入 `/skill-risk-checkup`。
 
-也可以输入 `/skill-risk-checkup`。
-
-Agent 会按这个 Skill 的步骤做两件事：先只读扫描本机已安装的 Skill，再由它自己的模型对照风险细则判断。结论写在这轮对话里。扫描脚本只提供线索，不代替这次判断。
+Agent 会先只读扫描本机已安装的 Skill，再由它自己的模型对照风险细则判断。结论写在这轮对话里。扫描脚本只提供线索，不代替这次判断。
 
 默认检查全部 Agent。
 
