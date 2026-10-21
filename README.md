@@ -22,7 +22,7 @@
 请安装 https://github.com/LiamZJU/skill-risk-checkup 这个 Skill，让之后的项目都能用。
 
 请执行这一条：
-npx skills add LiamZJU/skill-risk-checkup -g -a cursor -a claude-code -a codex -y
+npx skills add LiamZJU/skill-risk-checkup -g -y
 
 看到 ✓ ~\.agents\skills\skill-risk-checkup 就是装好了。
 如果结尾还有 PromptScript does not support global skill installation，只要上面的 ✓ 在，就按成功处理。
@@ -42,17 +42,12 @@ npx skills add LiamZJU/skill-risk-checkup -g -a cursor -a claude-code -a codex -
 给所有 Skill 做风险体检
 ```
 
+这条安装命令不带 Agent 名字。它把体检 Skill 装到本机已有的 Agent 上。装好之后，默认检查所有这些 Agent 里的 Skill。
+
 可选：
 
 - 第 4 步也可以输入 `/skill-risk-checkup`。
-- 只检查一个 Agent 时，把第 4 步换成「只检查 Codex 的 Skill」「只检查 Claude Code 的 Skill」或「只检查 Cursor 的 Skill」。
-- 只装给一个 Agent 时，把第 2 步里的命令换成下面三条中的一条，其余文字不动：
-
-```bash
-npx skills add LiamZJU/skill-risk-checkup -g -a cursor -y
-npx skills add LiamZJU/skill-risk-checkup -g -a claude-code -y
-npx skills add LiamZJU/skill-risk-checkup -g -a codex -y
-```
+- 只检查某一个 Agent 时，把第 4 步换成「只检查 Codex 的 Skill」「只检查 Claude Code 的 Skill」或「只检查 Cursor 的 Skill」。
 
 ## 方式 2：用 npx 安装并执行
 
@@ -61,8 +56,10 @@ npx skills add LiamZJU/skill-risk-checkup -g -a codex -y
 1. 必须：在终端安装。
 
 ```bash
-npx skills add LiamZJU/skill-risk-checkup -g -a cursor -a claude-code -a codex -y
+npx skills add LiamZJU/skill-risk-checkup -g -y
 ```
+
+这条命令不带 Agent 名字。它把体检 Skill 装到本机已有的 Agent 上。第 3 步默认检查所有这些 Agent 里的 Skill。
 
 2. 必须：确认输出里有这一行。有它才算装好。
 
@@ -92,7 +89,20 @@ npx github:LiamZJU/skill-risk-checkup list
 
 它打印每个 Skill 的来源、能不能改、名字和路径。
 
-只检查一个 Agent。把第 3 步换成其中一条：
+只看当前仓库，或只看用户目录：
+
+```bash
+npx github:LiamZJU/skill-risk-checkup check --project-only
+npx github:LiamZJU/skill-risk-checkup check --user-only
+```
+
+`list` 同样可以加这两个参数。
+
+装好之后如果还想在对话里用，新开一轮对话，发送「给所有 Skill 做风险体检」。
+
+### 只检查某一个 Agent
+
+这是检查范围，和上面的安装命令分开。安装仍然用第 1 步那条不带 Agent 名字的命令。
 
 ```bash
 npx github:LiamZJU/skill-risk-checkup check codex
@@ -106,25 +116,6 @@ npx github:LiamZJU/skill-risk-checkup check windsurf
 ```
 
 `claude` 和 `claudecode` 等同于 `claude-code`。`list` 也可以加上面的 Agent 名字，例如 `list codex`。Codex 会带上它也读取的共用目录。Claude Code 只看自己的目录。Cursor 还会带上它兼容读取的 Claude 和 Codex 目录。不认识的名字会列出可以用的 Agent。
-
-只看当前仓库，或只看用户目录：
-
-```bash
-npx github:LiamZJU/skill-risk-checkup check --project-only
-npx github:LiamZJU/skill-risk-checkup check --user-only
-```
-
-`list` 同样可以加这两个参数。
-
-只装给一个 Agent 时，把第 1 步换成：
-
-```bash
-npx skills add LiamZJU/skill-risk-checkup -g -a cursor -y
-npx skills add LiamZJU/skill-risk-checkup -g -a claude-code -y
-npx skills add LiamZJU/skill-risk-checkup -g -a codex -y
-```
-
-装好之后如果还想在对话里用，新开一轮对话，发送「给所有 Skill 做风险体检」。
 
 ## 没有 Node.js 时
 
