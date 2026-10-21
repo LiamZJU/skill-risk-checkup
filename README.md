@@ -14,6 +14,8 @@
 
 装好后，Agent 会在这轮对话里问你：要不要现在给所有 Skill 做风险检查。你同意后，检查就在当前对话里开始。
 
+已经安装之后，Agent 收不到推送。下次在对话里用到这个 Skill 时，它会比较 [GitHub 上的版本](https://github.com/LiamZJU/skill-risk-checkup)。有更新就在当前对话里问你要不要更新。
+
 也可以自己把 `skills/skill-risk-checkup` 整个目录复制到：
 
 | Agent | 目录 |

@@ -3,6 +3,7 @@ name: skill-risk-checkup
 description: >-
   对常见编程 Agent 已安装的 Skill 做只读风险体检，覆盖 Cursor、Claude、Codex、Copilot、OpenCode、Gemini、Grok，以及使用 .agents/skills 的其他 Agent。
   排查越权指令、隐瞒用户、机密泄露、远程执行、破坏性默认步骤、越界改配置，以及敏感能力自动触发过宽。
+  使用本 Skill 前先运行 scripts/check_update.py。本地 VERSION 与 GitHub main 上的 VERSION 不同时，先提醒用户有更新。
   在用户说「给所有 Skill 做风险体检」，或要求给 Skill 做诊断、体检、风险检查，或提到技能风险、skill 风险、skill checkup、/skill-risk-checkup 时使用。
 license: MIT
 compatibility: Requires Python 3. Uses the standard library only. Reads local skill files and does not modify them.
@@ -11,6 +12,22 @@ compatibility: Requires Python 3. Uses the standard library only. Reads local sk
 # Skill 风险体检
 
 只检查风险。不评文笔，不评行数，不改被审 Skill。
+
+## 先看有没有更新
+
+使用本 Skill 之前，用标准库 Python 运行同目录下的 `scripts/check_update.py`。先 `python`，失败再 `py -3`。
+
+```bash
+python <skill-dir>/scripts/check_update.py
+```
+
+标准输出是 JSON，调试信息在标准错误。`update` 为 false 时不要提更新，直接做后面的事。
+
+`update` 为 true 时，在当前对话里告诉用户：已安装的 skill-risk-checkup 有更新，并说上本地版本和最新版本。然后问要不要现在更新。
+
+用户同意后，把 GitHub 仓库 `skills/skill-risk-checkup` 里的文件覆盖到当前 Skill 目录，只动这个目录。覆盖后重新阅读 `SKILL.md`，再继续。用户拒绝就按现在这份继续。网络失败时 `reason` 是 `remote-unavailable`，告诉用户这次没能确认更新，然后继续。
+
+发布有用户可见的改动时，把同目录的 `VERSION` 改成新的值。已安装的副本靠这个文件发现更新。
 
 ## 安装之后先问一句
 
@@ -44,6 +61,7 @@ compatibility: Requires Python 3. Uses the standard library only. Reads local sk
 复制这份进度并逐项完成：
 
 ```
+- [ ] 0. 比较 VERSION，有更新先问用户
 - [ ] 1. 确认范围
 - [ ] 2. 运行扫描脚本，取得 JSON
 - [ ] 3. 用当前对话的模型按细则判定
