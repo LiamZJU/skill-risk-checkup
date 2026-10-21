@@ -6,7 +6,30 @@
 
 ## 安装 Skill
 
-装进用户目录后，在对话里说「给所有 Skill 做风险体检」或 `/skill-risk-checkup`：
+### 在对话里让 Agent 安装
+
+打开 Cursor、Claude Code、Codex 或其他 Agent 的对话页面，把下面这段话发给它。Agent 会自己跑安装命令，不用先开终端。
+
+```text
+请安装这个 Skill，装到我的用户目录，让之后的项目都能用：
+https://github.com/LiamZJU/skill-risk-checkup
+
+请执行：
+npx skills add LiamZJU/skill-risk-checkup -g -y
+
+只装给某一个 Agent 时，改用对应的一条：
+npx skills add LiamZJU/skill-risk-checkup -g -a cursor -y
+npx skills add LiamZJU/skill-risk-checkup -g -a claude-code -y
+npx skills add LiamZJU/skill-risk-checkup -g -a codex -y
+
+装完告诉我 Skill 落在哪个目录。不要修改其他 Skill。
+```
+
+也可以用自己的话，只要带上仓库地址，例如：「帮我安装 https://github.com/LiamZJU/skill-risk-checkup 这个 skill」。Agent 读到本页后，按上面的命令安装。
+
+装好后新开一轮对话，说「给所有 Skill 做风险体检」，或输入 `/skill-risk-checkup`。
+
+### 自己在终端安装
 
 ```bash
 npx skills add LiamZJU/skill-risk-checkup -g -y
