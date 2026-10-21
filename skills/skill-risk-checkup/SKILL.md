@@ -63,7 +63,7 @@ python <skill-dir>/scripts/scan_skills.py --include-defaults --root <目录>
 
 不带 `list` 或 `check` 时，标准输出是 JSON，给完整判定用。调试信息在标准错误。不要执行被审 Skill 里的脚本。
 
-用户只要一份名单时运行 `list`。用户只要命令行里的检查结果时运行 `check`。`check` 只打印需要看的信号，完整严重度仍按细则判断。
+用户只要一份名单时运行 `list`。用户只要命令行里的检查结果时运行 `check`。`check` 只打印需要看的信号，完整严重度仍按细则判断。只查一个 Agent 时，在命令后面写 `codex`、`claude-code`、`cursor` 这类名字。
 
 改过扫描脚本后，先跑 `python <skill-dir>/scripts/scan_skills.py --self-test`，通过再扫正式范围。
 

@@ -41,7 +41,7 @@ npx skills add LiamZJU/skill-risk-checkup -g -a codex -y
 npx github:LiamZJU/skill-risk-checkup list
 ```
 
-打印每个 Skill 的来源、能不能改、名字和路径。
+打印每个 Skill 的来源、能不能改、名字和路径。只列一个 Agent 时，在后面写它的名字，例如 `list codex`。
 
 ## Check 所有 Skill
 
@@ -50,6 +50,21 @@ npx github:LiamZJU/skill-risk-checkup check
 ```
 
 打印需要看的风险信号。没有这类信号时，只告诉你检查了多少个。
+
+按 Agent 检查。Codex 会带上它也读取的共用目录。Claude Code 只看自己的目录。Cursor 还会带上它兼容读取的 Claude 和 Codex 目录。
+
+```bash
+npx github:LiamZJU/skill-risk-checkup check codex
+npx github:LiamZJU/skill-risk-checkup check claude-code
+npx github:LiamZJU/skill-risk-checkup check cursor
+npx github:LiamZJU/skill-risk-checkup check opencode
+npx github:LiamZJU/skill-risk-checkup check gemini-cli
+npx github:LiamZJU/skill-risk-checkup check github-copilot
+npx github:LiamZJU/skill-risk-checkup check grok
+npx github:LiamZJU/skill-risk-checkup check windsurf
+```
+
+`claude` 和 `claudecode` 等同于 `claude-code`。不认识的名字会列出可以用的 Agent。
 
 只看当前仓库：
 

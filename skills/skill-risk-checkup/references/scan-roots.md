@@ -24,7 +24,9 @@ Codex 放在 `~/.codex/skills/.system` 里的 Skill，即使用户目录本身�
 | 目录 | 标记 | 谁会读 |
 | --- | --- | --- |
 | `~/.agents/skills/`、`<仓库>/.agents/skills/` | `shared` | Cursor、Codex、OpenCode、Gemini CLI、Copilot、Cline、Amp、Kimi |
-| `~/.config/agents/skills/` | `shared` | Amp、Kimi、Universal |
+| `~/.config/agents/skills/` | `universal` | Amp、Kimi、Universal |
+
+`list` 或 `check` 后面写 Agent 名字时，只进入这个 Agent 会加载的来源。`codex` 包含 `codex` 和 `shared`，不包含上面的 `universal`。`claude-code`（`claude`、`claudecode`）只有 `claude`。`cursor` 包含 `cursor`、`shared`、`claude` 和 `codex`。
 | `<仓库>/.claude/skills/`、`~/.claude/skills/` | `claude` | Claude Code；Cursor 也会兼容读取 |
 | `<仓库>/.codex/skills/` | `codex` | Cursor 兼容读取。Codex 自己的仓库 Skill 在 `.agents/skills/` |
 | `<仓库>/.agent/skills/` | `antigravity` | Antigravity；Droid 也会读这里 |

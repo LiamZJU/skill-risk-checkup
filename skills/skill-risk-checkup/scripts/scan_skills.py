@@ -343,7 +343,7 @@ CONFIG_ROOTS: tuple[tuple[str, str, str, bool], ...] = (
     ("opencode/skills", "opencode", "user", True),
     ("goose/skills", "goose", "user", True),
     ("crush/skills", "crush", "user", True),
-    ("agents/skills", "shared", "user", True),
+    ("agents/skills", "universal", "user", True),
 )
 
 # (suffix, agent, scope, editable, only a direct child of the project root)
@@ -390,6 +390,59 @@ PROJECT_ROOTS: tuple[tuple[str, str, str, bool, bool], ...] = (
     (".zcode/skills", "zcode", "project", True, False),
     ("skills", "openclaw", "project", True, True),
 )
+
+# Command names people type, and the skill directories that agent actually loads.
+AGENT_SOURCES: dict[str, set[str]] = {
+    "codex": {"codex", "shared"},
+    "claude-code": {"claude"},
+    "cursor": {"cursor", "shared", "claude", "codex"},
+    "opencode": {"opencode", "shared", "claude"},
+    "gemini-cli": {"gemini", "shared"},
+    "github-copilot": {"copilot", "shared", "claude"},
+    "grok": {"grok"},
+    "windsurf": {"windsurf"},
+    "cline": {"cline", "shared"},
+    "openclaw": {"openclaw"},
+    "droid": {"droid", "antigravity"},
+    "antigravity": {"antigravity"},
+    "goose": {"goose"},
+    "continue": {"continue"},
+    "roo": {"roo"},
+    "openhands": {"openhands"},
+    "augment": {"augment"},
+    "amp": {"shared", "universal"},
+    "kimi": {"shared", "universal"},
+}
+
+AGENT_ALIASES: dict[str, str] = {
+    "claude": "claude-code",
+    "claudecode": "claude-code",
+    "claude-code": "claude-code",
+    "gemini": "gemini-cli",
+    "gemini-cli": "gemini-cli",
+    "copilot": "github-copilot",
+    "github-copilot": "github-copilot",
+    "kimi-cli": "kimi",
+}
+
+
+def known_agent_labels() -> set[str]:
+    labels = {agent for _path, agent, _scope, _editable in USER_ROOTS}
+    labels.update(agent for _path, agent, _scope, _editable in CONFIG_ROOTS)
+    labels.update(agent for _suffix, agent, _scope, _editable, _direct in PROJECT_ROOTS)
+    labels.update({"codex", "claude"})
+    return labels
+
+
+def resolve_agent(name: str) -> tuple[str, set[str]]:
+    key = name.strip().lower().replace("_", "-").replace(" ", "")
+    canonical = AGENT_ALIASES.get(key, key)
+    if canonical in AGENT_SOURCES:
+        return canonical, set(AGENT_SOURCES[canonical])
+    if canonical in known_agent_labels():
+        return canonical, {canonical}
+    accepted = ", ".join(sorted(AGENT_SOURCES))
+    raise SystemExit(f"不认识的 Agent：{name}\n可以用：{accepted}")
 
 
 def config_home(home: Path, env: Mapping[str, str]) -> Path:
@@ -469,11 +522,14 @@ def discover_roots(
     *,
     include_user: bool = True,
     include_project: bool = True,
+    agents: set[str] | None = None,
 ) -> list[SkillRoot]:
     roots: list[SkillRoot] = []
     seen: set[Path] = set()
 
     def add(root: SkillRoot) -> None:
+        if agents is not None and root.agent not in agents:
+            return
         path = root.path.expanduser()
         try:
             identity = path.resolve() if path.exists() else path.absolute()
@@ -794,6 +850,7 @@ def scan_roots(roots: list[SkillRoot]) -> dict[str, object]:
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="List or check Agent Skills.")
     parser.add_argument("command", nargs="?", choices=("list", "check"), help="list prints skills. check prints risk signals.")
+    parser.add_argument("agent", nargs="?", help="One agent, such as codex or claude-code.")
     parser.add_argument(
         "--root",
         action="append",
@@ -836,6 +893,7 @@ def build_roots(args: argparse.Namespace) -> list[SkillRoot]:
         include_project = False
     if args.project_only and not args.include_defaults and not args.user_only:
         include_user = False
+    selected = resolve_agent(args.agent)[1] if args.agent else None
     roots: list[SkillRoot] = []
     if include_user or include_project:
         roots.extend(
@@ -845,6 +903,7 @@ def build_roots(args: argparse.Namespace) -> list[SkillRoot]:
                 os.environ,
                 include_user=include_user,
                 include_project=include_project,
+                agents=selected,
             )
         )
     roots.extend(SkillRoot(Path(raw), args.kind, "extra", True) for raw in args.root)
@@ -886,10 +945,12 @@ def report_for(args: argparse.Namespace) -> dict[str, object]:
     return report
 
 
-def format_list(report: dict[str, object]) -> str:
+def format_list(report: dict[str, object], agent_label: str | None = None) -> str:
     skills = list(report["skills"])  # type: ignore[arg-type]
     skills.sort(key=lambda item: (str(item["kind"]), str(item["name"]).lower()))
     if not skills:
+        if agent_label:
+            return f"{agent_label} 的目录里没有 Skill。\n"
         return "没有找到 Skill。\n"
     lines: list[str] = []
     for skill in skills:
@@ -897,11 +958,14 @@ def format_list(report: dict[str, object]) -> str:
         lines.append(f"{skill['kind']}  {access}  {skill['name']}")
         lines.append(f"  {skill['path']}")
     lines.append("")
-    lines.append(f"共 {len(skills)} 个 Skill。")
+    if agent_label:
+        lines.append(f"{agent_label}：共 {len(skills)} 个 Skill。")
+    else:
+        lines.append(f"共 {len(skills)} 个 Skill。")
     return "\n".join(lines) + "\n"
 
 
-def format_check(report: dict[str, object]) -> str:
+def format_check(report: dict[str, object], agent_label: str | None = None) -> str:
     skills = list(report["skills"])  # type: ignore[arg-type]
     flagged: list[tuple[dict[str, object], list[dict[str, object]]]] = []
     for skill in skills:
@@ -910,7 +974,13 @@ def format_check(report: dict[str, object]) -> str:
             flagged.append((skill, hits))
     flagged.sort(key=lambda item: str(item[0]["name"]).lower())
     count = report["summary"]["skills"]  # type: ignore[index]
-    lines = [f"检查了 {count} 个 Skill。"]
+    if agent_label:
+        lines = [f"检查了 {agent_label} 的 {count} 个 Skill。"]
+    else:
+        lines = [f"检查了 {count} 个 Skill。"]
+    if count == 0:
+        lines.append("这个 Agent 的目录里没有 Skill。" if agent_label else "没有找到 Skill。")
+        return "\n".join(lines) + "\n"
     if not flagged:
         lines.append("没有需要处理的风险信号。")
         return "\n".join(lines) + "\n"
@@ -958,6 +1028,7 @@ def assert_discovery(failures: list[str]) -> None:
         write_skill(home / ".cursor" / "skills-cursor" / "builtin-skill", "builtin-skill", "Built in.")
         write_skill(home / ".codex" / "skills" / ".system" / "sys-skill", "sys-skill", "System.")
         write_skill(home / ".codex" / "skills" / "mine", "mine", "Mine.")
+        write_skill(home / ".config" / "agents" / "skills" / "amp-only", "amp-only", "Amp config.")
         write_skill(project / "apps" / "web" / ".cursor" / "skills" / "nested", "nested", "Nested.")
         write_skill(project / "skills" / "claw", "claw", "Claw.")
         write_skill(project / "src" / "skills" / "library", "library", "Not a skill root.")
@@ -971,9 +1042,24 @@ def assert_discovery(failures: list[str]) -> None:
         assert_true(repo_root(project / "apps") == project.resolve(), "repo root not found", failures)
         roots = discover_roots(home, [home, project], {})
         report = scan_roots(roots)
+        claude_names = {
+            skill["name"]
+            for skill in scan_roots(
+                discover_roots(home, [project], {}, agents=resolve_agent("claudecode")[1])
+            )["skills"]
+        }
+        codex_names = {
+            skill["name"]
+            for skill in scan_roots(
+                discover_roots(home, [project], {}, agents=resolve_agent("codex")[1])
+            )["skills"]
+        }
+        assert_true(claude_names == {"hello"}, "claude-code should only see its own skills", failures)
+        assert_true(codex_names == {"mine", "sys-skill"}, "codex should see its own skills", failures)
+        assert_true("amp-only" not in codex_names and "amp-only" not in claude_names, "config agents skills are not codex or claude", failures)
 
     by_name = {str(skill["name"]): skill for skill in report["skills"]}  # type: ignore[index]
-    for name in ("hello", "builtin-skill", "sys-skill", "mine", "nested", "claw"):
+    for name in ("hello", "builtin-skill", "sys-skill", "mine", "nested", "claw", "amp-only"):
         assert_true(name in by_name, f"discovery missed {name}", failures)
     for name in ("library", "hidden", "too-deep"):
         assert_true(name not in by_name, f"discovery should skip {name}", failures)
@@ -1137,11 +1223,12 @@ def main(argv: list[str]) -> int:
     args = parse_args(argv)
     if args.self_test:
         return self_test()
+    label = resolve_agent(args.agent)[0] if args.agent else None
     report = report_for(args)
     if args.command == "list":
-        sys.stdout.write(format_list(report))
+        sys.stdout.write(format_list(report, label))
     elif args.command == "check":
-        sys.stdout.write(format_check(report))
+        sys.stdout.write(format_check(report, label))
     else:
         emit(report, args.summary_only)
     return 0
