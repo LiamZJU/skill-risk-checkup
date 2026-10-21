@@ -1,0 +1,18 @@
+{
+  "name": "skill-risk-checkup",
+  "version": "1.0.0",
+  "description": "List installed agent skills and check them for risk.",
+  "license": "MIT",
+  "bin": {
+    "skill-risk-checkup": "bin/skill-risk-checkup.js"
+  },
+  "files": [
+    "bin",
+    "skills",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

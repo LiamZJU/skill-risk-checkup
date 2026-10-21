@@ -61,7 +61,9 @@ python <skill-dir>/scripts/scan_skills.py --skill <SKILL.md 或技能目录>
 python <skill-dir>/scripts/scan_skills.py --include-defaults --root <目录>
 ```
 
-标准输出是 JSON。调试信息在标准错误，包括每个根目录扫到多少个。不要执行被审 Skill 里的脚本。
+不带 `list` 或 `check` 时，标准输出是 JSON，给完整判定用。调试信息在标准错误。不要执行被审 Skill 里的脚本。
+
+用户只要一份名单时运行 `list`。用户只要命令行里的检查结果时运行 `check`。`check` 只打印需要看的信号，完整严重度仍按细则判断。
 
 改过扫描脚本后，先跑 `python <skill-dir>/scripts/scan_skills.py --self-test`，通过再扫正式范围。
 

@@ -792,7 +792,8 @@ def scan_roots(roots: list[SkillRoot]) -> dict[str, object]:
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Scan Agent Skills for mechanical risk signals.")
+    parser = argparse.ArgumentParser(description="List or check Agent Skills.")
+    parser.add_argument("command", nargs="?", choices=("list", "check"), help="list prints skills. check prints risk signals.")
     parser.add_argument(
         "--root",
         action="append",
@@ -883,6 +884,46 @@ def report_for(args: argparse.Namespace) -> dict[str, object]:
                 continue
             report["skills"].append(scan_skill(path, extra_origin(path.parent, "extra"), skill_dirs))  # type: ignore[index]
     return report
+
+
+def format_list(report: dict[str, object]) -> str:
+    skills = list(report["skills"])  # type: ignore[arg-type]
+    skills.sort(key=lambda item: (str(item["kind"]), str(item["name"]).lower()))
+    if not skills:
+        return "没有找到 Skill。\n"
+    lines: list[str] = []
+    for skill in skills:
+        access = "可改" if skill["editable"] else "只读"
+        lines.append(f"{skill['kind']}  {access}  {skill['name']}")
+        lines.append(f"  {skill['path']}")
+    lines.append("")
+    lines.append(f"共 {len(skills)} 个 Skill。")
+    return "\n".join(lines) + "\n"
+
+
+def format_check(report: dict[str, object]) -> str:
+    skills = list(report["skills"])  # type: ignore[arg-type]
+    flagged: list[tuple[dict[str, object], list[dict[str, object]]]] = []
+    for skill in skills:
+        hits = [signal for signal in skill["signals"] if signal.get("actionable")]  # type: ignore[index]
+        if hits:
+            flagged.append((skill, hits))
+    flagged.sort(key=lambda item: str(item[0]["name"]).lower())
+    count = report["summary"]["skills"]  # type: ignore[index]
+    lines = [f"检查了 {count} 个 Skill。"]
+    if not flagged:
+        lines.append("没有需要处理的风险信号。")
+        return "\n".join(lines) + "\n"
+    lines.append(f"{len(flagged)} 个 Skill 需要看。")
+    lines.append("")
+    for skill, hits in flagged:
+        lines.append(f"{skill['name']}  ({skill['kind']})")
+        lines.append(f"  {skill['path']}")
+        for hit in hits:
+            lines.append(f"  - {hit['rule']}  {hit['file']}:{hit['line']}")
+            lines.append(f"    {hit['excerpt']}")
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def emit(report: dict[str, object], summary_only: bool) -> None:
@@ -1076,6 +1117,13 @@ def self_test() -> int:
     )
     assert_true(bool(scanner_skill["deep_read"]), "helper script should force deep-read", failures)
 
+    listed = format_list(report)
+    checked = format_check(report)
+    assert_true("bad-skill" in listed and "good-skill" in listed, "list should name the skills", failures)
+    assert_true("bad-skill" in checked and "remote-shell" in checked, "check should show the risky skill", failures)
+    assert_true("advice-skill" not in checked, "check should skip skills without signals", failures)
+    assert_true(raw_key not in listed and raw_key not in checked, "human output leaked the raw key", failures)
+
     if failures:
         for failure in failures:
             log(f"SELF-TEST FAIL {failure}")
@@ -1089,7 +1137,13 @@ def main(argv: list[str]) -> int:
     args = parse_args(argv)
     if args.self_test:
         return self_test()
-    emit(report_for(args), args.summary_only)
+    report = report_for(args)
+    if args.command == "list":
+        sys.stdout.write(format_list(report))
+    elif args.command == "check":
+        sys.stdout.write(format_check(report))
+    else:
+        emit(report, args.summary_only)
     return 0
 
 
