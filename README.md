@@ -4,6 +4,37 @@
 
 它不修改被检查的 Skill。需要 Node.js 和 Python 3。扫描只用 Python 标准库。
 
+## 安装 Skill
+
+装进用户目录后，在对话里说「给所有 Skill 做风险体检」或 `/skill-risk-checkup`：
+
+```bash
+npx skills add LiamZJU/skill-risk-checkup -g -y
+```
+
+只装给一个 Agent：
+
+```bash
+npx skills add LiamZJU/skill-risk-checkup -g -a cursor -y
+npx skills add LiamZJU/skill-risk-checkup -g -a claude-code -y
+npx skills add LiamZJU/skill-risk-checkup -g -a codex -y
+```
+
+没有 Node.js 时，把 `skills/skill-risk-checkup` 整个目录复制到：
+
+| Agent | 目录 |
+| --- | --- |
+| Cursor | `~/.cursor/skills/skill-risk-checkup` |
+| Claude Code | `~/.claude/skills/skill-risk-checkup` |
+| Codex | `~/.codex/skills/skill-risk-checkup` |
+| OpenCode | `~/.config/opencode/skills/skill-risk-checkup` |
+| Gemini CLI | `~/.gemini/skills/skill-risk-checkup` |
+| Grok | `~/.grok/skills/skill-risk-checkup` |
+| GitHub Copilot | `~/.copilot/skills/skill-risk-checkup` |
+| 多个 Agent 共用 | `~/.agents/skills/skill-risk-checkup` |
+
+复制后重新打开一次 Agent 对话。
+
 ## List 所有 Skill
 
 ```bash
@@ -28,29 +59,6 @@ npx github:LiamZJU/skill-risk-checkup check --project-only
 ```
 
 只看用户目录里的 Skill：把 `--project-only` 换成 `--user-only`。
-
-## 安装到 Agent
-
-装进用户目录后，在对话里说「给所有 Skill 做风险体检」或 `/skill-risk-checkup`：
-
-```bash
-npx skills add LiamZJU/skill-risk-checkup -g -y
-```
-
-只装给一个 Agent 时加上 `-a cursor`、`-a claude-code` 或 `-a codex`。
-
-没有 Node.js 时，把 `skills/skill-risk-checkup` 复制到：
-
-| Agent | 目录 |
-| --- | --- |
-| Cursor | `~/.cursor/skills/skill-risk-checkup` |
-| Claude Code | `~/.claude/skills/skill-risk-checkup` |
-| Codex | `~/.codex/skills/skill-risk-checkup` |
-| OpenCode | `~/.config/opencode/skills/skill-risk-checkup` |
-| Gemini CLI | `~/.gemini/skills/skill-risk-checkup` |
-| Grok | `~/.grok/skills/skill-risk-checkup` |
-| GitHub Copilot | `~/.copilot/skills/skill-risk-checkup` |
-| 多个 Agent 共用 | `~/.agents/skills/skill-risk-checkup` |
 
 ## 许可证
 
