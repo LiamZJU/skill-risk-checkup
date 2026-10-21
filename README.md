@@ -22,10 +22,9 @@
 请安装 https://github.com/LiamZJU/skill-risk-checkup 这个 Skill，让之后的项目都能用。
 
 请执行这一条：
-npx skills add LiamZJU/skill-risk-checkup -g -y
+npx github:LiamZJU/skill-risk-checkup install
 
-看到 ✓ ~\.agents\skills\skill-risk-checkup 就是装好了。
-如果结尾还有 PromptScript does not support global skill installation，只要上面的 ✓ 在，就按成功处理。
+这条命令会把 Skill 装到本机已有的 Agent 上。装好之后，默认检查这些 Agent 里的全部 Skill。
 
 装完后用中文告诉我这三件事：
 1. Skill 已经装好
@@ -56,20 +55,14 @@ npx skills add LiamZJU/skill-risk-checkup -g -y
 1. 必须：在终端安装。
 
 ```bash
-npx skills add LiamZJU/skill-risk-checkup -g -y
+npx github:LiamZJU/skill-risk-checkup install
 ```
 
-这条命令不带 Agent 名字。它把体检 Skill 装到本机已有的 Agent 上。第 3 步默认检查所有这些 Agent 里的 Skill。
+这条命令不带 Agent 名字。它把体检 Skill 装到本机已有的 Agent 上。第 3 步默认检查这些 Agent 里的全部 Skill。
 
-2. 必须：确认输出里有这一行。有它才算装好。
-
-```text
-✓ ~\.agents\skills\skill-risk-checkup
-```
+2. 必须：确认命令打印了「安装完成」和目录 `~\.agents\skills\skill-risk-checkup`。看到这两样就是装好了。
 
 Cursor 和 Codex 直接读这个目录。Claude Code 使用指向同一份文件的快捷方式。
-
-如果结尾还有 `PromptScript does not support global skill installation`，同时上面的 `✓` 已经出现，安装已经完成，继续第 3 步。
 
 3. 必须：执行检查。
 
