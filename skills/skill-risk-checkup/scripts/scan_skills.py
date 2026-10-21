@@ -868,7 +868,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument("--self-test", action="store_true", help="Run hermetic detector checks.")
     parser.add_argument("--summary-only", action="store_true", help="Print summary JSON instead of the full report.")
-    return parser.parse_args(argv)
+    parser.add_argument("--agent", dest="agent_flag", default=None, help="Limit the scan to one agent.")
+    args = parser.parse_args(argv)
+    if args.agent_flag:
+        args.agent = args.agent_flag
+    return args
 
 
 def skill_target(raw: str) -> Path:

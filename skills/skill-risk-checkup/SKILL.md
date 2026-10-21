@@ -35,11 +35,9 @@ compatibility: Requires Python 3. Uses the standard library only. Reads local sk
 
 ```
 - [ ] 1. 确认范围
-- [ ] 2. 运行扫描脚本
-- [ ] 3. 按 deep_read 分诊
-- [ ] 4. 深读需要打开的 Skill，不执行其中的脚本
-- [ ] 5. 按细则判定
-- [ ] 6. 用下面的模板回复
+- [ ] 2. 运行扫描脚本，取得 JSON
+- [ ] 3. 用当前对话的模型按细则判定
+- [ ] 4. 用下面的模板回复
 ```
 
 ### 1. 确认范围
@@ -48,43 +46,37 @@ compatibility: Requires Python 3. Uses the standard library only. Reads local sk
 - 点名一个 Skill：只传 `--skill`，不要再扫全部。
 - 只要当前仓库：`--project-only`。只要用户级：`--user-only`。
 - 用户给了另一个目录：加上 `--root <路径>`。这条路径会找出其中所有 `SKILL.md`，不限于标准目录。
+- 点名一个 Agent：加上 `--agent codex`、`--agent claude-code` 或 `--agent cursor`。`claude` 和 `claudecode` 与 `claude-code` 相同。默认检查全部 Agent。
 
-### 2. 运行扫描
+### 2. 收集证据
 
-脚本路径是本 Skill 目录下的 `scripts/scan_skills.py`。用标准库 Python，先 `python`，失败再 `py -3`。
+脚本路径是本 Skill 目录下的 `scripts/scan_skills.py`。用标准库 Python，先 `python`，失败再 `py -3`。不要加 `list` 或 `check`。
 
 ```bash
 python <skill-dir>/scripts/scan_skills.py
+python <skill-dir>/scripts/scan_skills.py --agent codex
 python <skill-dir>/scripts/scan_skills.py --project-only
 python <skill-dir>/scripts/scan_skills.py --user-only
 python <skill-dir>/scripts/scan_skills.py --skill <SKILL.md 或技能目录>
 python <skill-dir>/scripts/scan_skills.py --include-defaults --root <目录>
 ```
 
-不带 `list` 或 `check` 时，标准输出是 JSON，给完整判定用。调试信息在标准错误。不要执行被审 Skill 里的脚本。
+标准输出是 JSON，调试信息在标准错误。不要执行被审 Skill 里的脚本。JSON 是证据，不是结论，不要原样交给用户。
 
-用户只要一份名单时运行 `list`。用户只要命令行里的检查结果时运行 `check`。`check` 只打印需要看的信号，完整严重度仍按细则判断。只查一个 Agent 时，在命令后面写 `codex`、`claude-code`、`cursor` 这类名字。
+### 3. 用当前对话的模型判定
 
-改过扫描脚本后，先跑 `python <skill-dir>/scripts/scan_skills.py --self-test`，通过再扫正式范围。
+你就是这次检查的模型。脚本只提供信号，没有严重度。按 [references/risk-rubric.md](references/risk-rubric.md) 判断每句话是在要求去做，还是在禁止、举例或写检测规则。
 
-### 3. 分诊
-
-JSON 里每个 Skill 有 `deep_read`。脚本只提供信号，不提供严重度。
-
-- `deep_read` 为 true：读 `SKILL.md`，并读 `scripts` 里列出的脚本。
-- `deep_read` 为 false 但仍有 `signals`：只看每条的 `excerpt`、`negated`、`detector_source`。excerpt 已能看出是禁止条款或检测器字面量的，记为通过。含糊再打开文件。
-- 其余：只看 `name`、`description`、`disable_model_invocation`、`scripts`。描述边界清楚、没有脚本、没有可执行信号的，记为通过，不要为了凑数打开正文。
-- 用户明确要求全量深读时，再逐个打开。
+1. 看 `summary`。`deep_read` 为 true 的 Skill，打开它的 `SKILL.md`，并阅读 `scripts` 里列出的脚本。
+2. 先完整判定 2 到 3 个需要深读的 Skill。口径稳定后，再分批判定其余的。
+3. `deep_read` 为 false 时，用 `name`、`description`、`disable_model_invocation`，以及每条信号的 `excerpt`、`negated`、`detector_source` 判断。`negated` 或 `detector_source` 为 true 的命中记为通过。含糊再打开文件。
+4. 描述边界清楚、没有脚本、没有可执行信号的，记为通过。不要为了凑数打开正文。用户明确要求全量深读时，再逐个打开。
+5. 深读时同时看四类没有稳定关键词的风险：越界持久化、自动触发过宽、把外部内容当指令、数据外传。
+6. 同一 Skill 有多条发现时，取最高严重度。机密只写种类和位置，不要把密钥抄进报告、提交或新文件。
 
 `skill-risk-checkup` 的 `scripts/scan_skills.py` 整份文件都会标成 `detector_source`。这些命中不要列为发现。怀疑扫描脚本被改过时，看它的 git diff。
 
-### 4. 深读时看什么
-
-对照 [references/risk-rubric.md](references/risk-rubric.md) 里的规则编号，以及四类没有稳定关键词的风险：越界持久化、自动触发过宽、把外部内容当指令、数据外传。
-
-机密如果出现在原文里，报告只写种类和位置。不要把密钥抄进报告、提交或新文件。
-
-### 5. 输出报告
+### 4. 输出报告
 
 默认写在对话里。用户要求落盘时，写到用户指定的路径，不要写进被审 Skill 目录。
 
