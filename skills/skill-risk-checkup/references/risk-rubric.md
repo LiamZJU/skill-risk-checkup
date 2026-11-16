@@ -7,18 +7,18 @@
 | 编号 | 精度 | 在看什么 |
 | --- | --- | --- |
 | `instruction-override` | 高 | 要求忽略更高优先级的指令、规则或提示 |
-| `concealment` | 高 | 要求隐瞒用户，或藏起真实做了什么 |
-| `remote-shell` | 高 | 下载后直接交给 shell 执行，或执行编码后的命令 |
+| `concealment` | 高 | 要求隐瞒用户，或藏起真实做了什么。要求不要把密钥或口令告诉用户，不算 |
+| `remote-shell` | 高 | 下载后直接交给 shell 或解释器执行，包括先拼进命令再执行，以及执行编码后的命令 |
 | `secret-assignment` | 高 | 给密钥、口令、token 赋了具体值 |
 | `token-prefix` | 高 | 出现云厂商或平台令牌的固定前缀 |
 | `private-key` | 高 | 出现私钥块 |
 | `safety-bypass` | 高 | 要求关掉安全检查或进入无限制模式 |
 | `webhook` | 高 | 把数据发到常见的外部接收地址 |
-| `destructive-git` | 低 | 出现强制推送、硬重置，或跳过提交钩子 |
+| `destructive-git` | 低 | 出现强制推送、硬重置，或在 git 提交、推送、合并、变基时跳过钩子。`--force-with-lease` 不算 |
 
 扫描脚本还会标两个属性：
 
-- `negated`：危险说法前面有限制词时为 true。限制词落在匹配片段内部时，不算否定。例如要求瞒着用户，本身就是风险。
+- `negated`：同一行里，危险说法前面有限制词时为 true。紧挨着的上一行如果是以冒号结尾的禁止引导（例如「不要：」），也算。再往上的句子不算，避免一句普通的禁止把后面的命令盖掉。限制词落在匹配片段内部时，不算否定。例如要求瞒着用户，本身就是风险。
 - `detector_source`：命中行在 `skill-risk-checkup` 的 `scripts/scan_skills.py` 里。整份文件都算检测器，不是这个 Skill 在要求代理去做。
 
 ## 只靠阅读判断的风险
@@ -43,6 +43,8 @@
 ## 不算发现
 
 - 明确禁止危险动作，危险说法只是被禁止的对象。
+- 要求不要把密钥、口令或凭据告诉用户。
+- `--force-with-lease`，以及出现在 git 提交、推送、合并、变基以外的 `--no-verify`。
 - `skill-risk-checkup` 的 `scripts/scan_skills.py` 整份文件。扫描脚本会把这些命中标成 `detector_source`。怀疑这个文件被改过时，看 git diff，不要只看信号。
 - `example`、`placeholder`、`changeme`、`your-api-key` 一类占位符。脚本默认不报这些。
 - `editable` 为 false 的官方流程，包括内置、插件缓存、系统目录和管理员目录，除非它真的在要求越权、隐瞒、泄密或远程执行。
